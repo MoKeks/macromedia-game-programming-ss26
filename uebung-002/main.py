@@ -27,6 +27,8 @@ player_movement_y = 0
 player_gravity = 0.1
 
 
+
+
 # ---- Bouncing circle (aus dem "Boing boing"-Beispiel) ----
 circle_x = 300.0
 circle_y = 50.0
@@ -51,6 +53,20 @@ obstacles.append( pygame.Rect(400, SCREEN_HEIGHT - 100, 100, 10))
 
 # ---- Status-Text ----
 status = "Wheee!"
+
+
+# ---- Functions ----
+def SetGrav(active):
+    print(active)
+    global player_gravity
+    if active:
+        player_gravity = 0.1
+        print("grave on")
+    if active==False:
+        print ("grave off")
+        player_gravity = 0
+
+
 
 # ============================================================
 # Game Loop
@@ -88,12 +104,7 @@ while running:
     player_movement_y += player_gravity
     player_y += player_movement_y
 
-    def grav (on) :
-        if on == 1:
-            print (player_gravity)
-            player_gravity = 0.1
-        elif on == 0 :
-            player_gravity = 0.0    
+    
 
     # Bouncing circle: Gravitation + Bewegung
     circle_movement_y += gravity
@@ -111,31 +122,29 @@ while running:
     # Collision
     player_collider = pygame.Rect (player_x , player_y, player_radius, player_radius)
     
-   # def collision () :
-    #    player_movement_y = 0
-     ##   grav (0)
 
-        # Jump
-
-       # keys = pygame.key.get_pressed()
-        #if keys [pygame.K_SPACE]:
-         #   player_movement_y -= 5
-          #  grav (1)
 
 
     if player_collider.collidelistall (obstacles) :
-        grav (0)
+        #player_gravity = 0
+        SetGrav(False)
         player_movement_y = 0
         
 
         # Jump
         keys = pygame.key.get_pressed()
         if keys [pygame.K_SPACE]:
-            grav (1)
+            #player_gravity = 0.1
+            SetGrav(True)
+            print("jump")
+
             player_movement_y -= 5
             
     else :
-       grav (0)
+        SetGrav(True)
+        #player_gravity = 0.1
+
+        print("no collide")
 
 
     # ---- Draw ----

@@ -53,6 +53,22 @@ class Enemy(Entity):
             # Calculate direction toward target (not applied — stub)
             direction = target_pos - self.pos
             # TODO: Normalize direction, apply speed, move toward target
+    # ------------------------------------------------------------------ #
+    #  Alive check -- nur wenn lebt wird er generiert                                                   #
+    # ------------------------------------------------------------------ #
+   
+    def draw(self, screen):
+        if not self.alive:
+            return              # Toter Enemy wird nicht gezeichnet
+        super().draw(screen)
+    # ------------------------------------------------------------------ #
+    #  collision check                                                    #
+    # ------------------------------------------------------------------ #
+    def collision(self, rect):
+        if not self.alive:
+            return False
+        return self.get_rect().colliderect(rect)
+        
 
     # ------------------------------------------------------------------ #
     #  is_alive — check if enemy HP is above 0 (latches to dead)        #

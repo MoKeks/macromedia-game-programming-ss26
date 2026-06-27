@@ -61,6 +61,10 @@ class Player(Entity):
         mouse_x, _ = pygame.mouse.get_pos()
         self.pos.x = mouse_x
 
+        # Player Y follows mouse Y position (DEBUG())
+        _ ,mouse_y  = pygame.mouse.get_pos()
+        self.pos.y = mouse_y
+
         # Cadence countdown — fire a shot when it reaches 0
         self._cad_counter -= 1
         if self._cad_counter <= 0:

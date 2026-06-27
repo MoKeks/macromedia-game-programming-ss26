@@ -14,6 +14,10 @@ import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, BLACK
 from player import Player
 from level import Level
+from gamestate import Game
+from enemy import Enemy
+from obstacle import Obstacle
+from shot import Shot
 
 
 def main():
@@ -38,37 +42,100 @@ def main():
         anim_speed=1,
         hp=100,
     )
-    player.set_might(rng=100, dmg=1, cad=50, shotspd=1)
+    player.set_might(rng=10000, dmg=1, cad=0, shotspd= 1)
+
+    enemies = Enemy ()
+    enemies.setup(
+        x=SCREEN_WIDTH // 2,
+        y=SCREEN_HEIGHT,
+        dx=0,
+        dy=0,
+        image_prefix="enemy",
+        anim_speed=1,
+        hp=10,
+        damage=1
+    )
 
     level = Level()
     level.load("lvl001.rfg")
 
-    game_state = "playing"  # TODO: Add "title" and "gameover" states
+    game_state = Game()
+    game_state.change_state("playing")
+
+
+    
+    obstacle = Obstacle ()
+
+    shot = Shot ()
 
     # ------------------------------------------------------------------ #
     #  Game loop                                                         #
     # ------------------------------------------------------------------ #
     running = True
     while running:
-
-        # -------------------------------------------------------------- #
-        #  Event handling                                                 #
-        # -------------------------------------------------------------- #
+        dt= clock.tick(FPS)
+            
+            # -------------------------------------------------------------- #
+            #  Event handling                                                 #
+            # -------------------------------------------------------------- #
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
+                 if event.type == pygame.QUIT:
+                     running = False
+                 elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                     running = False
 
         # -------------------------------------------------------------- #
         #  Update                                                        #
         # -------------------------------------------------------------- #
-        player.step()
-        level.step()
+          # checking for game-state
+        if game_state.state == "playing":
+            player.step()
+            level.step()
 
-        # TODO: Check collisions (shots vs enemies, enemies vs player)
-        # TODO: Check player.hp <= 0 for death / game_state transition
+       
+
+
+        #----------------------------------------------------------------#
+        # Check collisions
+        #----------------------------------------------------------------#
+
+        # Obstacle collsion
+            for obstacle in level.obstacles:
+                 if obstacle.collsion(player.get_rect()):
+                    player.hp -= 1
+                
+          
+        # Enemy collsion
+            for enemies in level.enemies:
+                if not enemies.alive :
+                    continue
+
+                if enemies.collision(player.get_rect()):
+                    player.hp -= 1
+                    enemies.hp -= 5
+                    enemies.is_alive()
+
+                elif enemies.collision(shot.get_rect()):
+                    enemies.hp -= 1
+                    enemies.is_alive()
+
+        # Shot Collision
+
+       
+        # Check player.hp <= 0 for death / game_state transition
+            if player.hp <= 0:
+                game_state.change_state("gameover")
+
+        ## game over mechanic
+        elif game_state.state == "gameover":
+           # wäre funny: pygame.quit # einfach spiel schließen wenn man stirbt
+            screen.fill(BLACK)
+            font = pygame.font.SysFont(None, 72)
+            text = font.render("Game Over!", True, (255, 255, 255))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
+            pygame.display.flip()
+            continue   # Spiellogik überspringen
 
         # -------------------------------------------------------------- #
         #  Draw                                                          #
@@ -78,8 +145,13 @@ def main():
         # Draw level background first
         level.draw(screen)
 
-        # TODO: Draw enemies
-        # TODO: Draw obstacles
+        # Draw enemies
+        for enemies in level.enemies:
+                enemies.draw(screen)
+       
+        # Draw obstacles
+        for obstacle in level.obstacles:
+                obstacle.draw(screen)
 
         # Draw player (also draws its shots internally)
         player.draw(screen)

@@ -1,9 +1,10 @@
 # obstacle.py
 # Simple obstacle data class. Parsed from level file but NOT drawn or
 # collision-checked in the skeleton. Students implement this in Uebung 003.
+from entity import Entity
+import pygame
 
-
-class Obstacle:
+class Obstacle(Entity):
     """Data-only obstacle. Parsed from .rfg level files.
 
     Students should implement:
@@ -25,8 +26,18 @@ class Obstacle:
         self.color = color              # RGB color tuple
         self.width = width              # Pixel width
 
+   
         # Derived screen coordinates (students compute these from track layout)
         self.x1 = 0
         self.x2 = 0
         self.y1 = 0
         self.y2 = 0
+
+    def collsion(self, rect):
+        if self.get_rect().colliderect(rect):
+            return True
+
+    # ------------------------------------------------------------------ #
+   # def move ()
+   
+    # obstcales = pygame.Rect(5, 5, 5, 5)
