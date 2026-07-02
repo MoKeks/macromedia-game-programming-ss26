@@ -169,9 +169,23 @@ def main():
             pygame.display.flip()
 
             #Score und Highscore
-            font = pygame.font.SysFont(None, 50)
-            text = font.render(f"Score: {points}", True, (150, 50, 200))
-            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+            #Mit Highscore abgleichen
+            if points > highscore :
+                #Neuer Highscore
+                highscore = points
+                font = pygame.font.SysFont(None, 50)
+                text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+
+            else:
+                #Show current score
+                font = pygame.font.SysFont(None, 50)
+                text = font.render(f"Score: {points}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+                # bisheriger Highscore
+                font = pygame.font.SysFont(None, 50)
+                text = font.render(f"Highscore: {points}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
 
 
             continue   # Spiellogik überspringen
@@ -204,7 +218,9 @@ def main():
         screen.blit(text, (SCREEN_WIDTH - 230 , SCREEN_HEIGHT - 70))
 
         # Score system
-        
+        font = pygame.font.SysFont(None, 50)
+        text = font.render(f"Score: {points}", True, (150, 50, 200))
+        screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
 
         #Mit Highscore abgleichen
         if points > highscore :
