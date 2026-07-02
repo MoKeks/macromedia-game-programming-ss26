@@ -19,6 +19,8 @@ from enemy import Enemy
 from obstacle import Obstacle
 from shot import Shot
 
+from time import sleep
+
 
 def main():
     # ------------------------------------------------------------------ #
@@ -65,10 +67,13 @@ def main():
 
     points = 0
     highscore = 0
+    old_highscore = highscore
+
     
     obstacle = Obstacle ()
 
     shot = Shot ()
+
 
     # ------------------------------------------------------------------ #
     #  Game loop                                                         #
@@ -86,6 +91,13 @@ def main():
                  elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                      running = False
+                    if event.key == pygame.K_SPACE:
+                        if game_state.state == "gameover":
+                            restart (player, enemies, level, game_state, highscore, old_highscore)
+                
+                
+                     
+                    
 
         # -------------------------------------------------------------- #
         #  Update                                                        #
@@ -154,7 +166,11 @@ def main():
 
        
                 # Check player.hp <= 0 for death / game_state transition
-            if player.hp <= 0:
+            if player.hp <= 0:#
+               
+                if points > highscore : #highscore checken
+                    old_highscore = highscore
+                    highscore = points
                 game_state.change_state("gameover")
 
         ## game over mechanic
@@ -166,27 +182,40 @@ def main():
             font = pygame.font.SysFont(None, 72)
             text = font.render("Game Over!", True, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
-            pygame.display.flip()
+
+            font = pygame.font.SysFont(None, 60)
+            text = font.render("Press SPACE to Restart", True, (255, 255, 255))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
+            
+            
 
             #Score und Highscore
-            #Mit Highscore abgleichen
-            if points > highscore :
-                #Neuer Highscore
-                highscore = points
-                font = pygame.font.SysFont(None, 50)
-                text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+            # Highscore abgleichen
+            if points <= old_highscore:
+                #Show current score
+                font = pygame.font.SysFont(None, 40)
+                text = font.render(f"Score: {points}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
+                # bisheriger Highscore
+                font = pygame.font.SysFont(None, 30)
+                text = font.render(f"Highscore: {highscore}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 150))
 
             else:
-                #Show current score
+                #Neuer Highscore
                 font = pygame.font.SysFont(None, 50)
-                text = font.render(f"Score: {points}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
-                # bisheriger Highscore
-                font = pygame.font.SysFont(None, 50)
-                text = font.render(f"Highscore: {points}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+                text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
+                
 
+
+            # print ("space") #DEBUG
+           
+
+
+            pygame.display.flip()
+            
+            
 
             continue   # Spiellogik überspringen
 
@@ -222,24 +251,6 @@ def main():
         text = font.render(f"Score: {points}", True, (150, 50, 200))
         screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
 
-        #Mit Highscore abgleichen
-        if points > highscore :
-            #Neuer Highscore
-            highscore = points
-            font = pygame.font.SysFont(None, 50)
-            text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
-            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
-
-        else:
-            #Show current score
-            font = pygame.font.SysFont(None, 50)
-            text = font.render(f"Score: {points}", True, (150, 50, 200))
-            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
-            # bisheriger Highscore
-            font = pygame.font.SysFont(None, 50)
-            text = font.render(f"Highscore: {points}", True, (150, 50, 200))
-            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
-    
         
         pygame.display.flip()
         clock.tick(FPS)
@@ -249,6 +260,41 @@ def main():
     # ------------------------------------------------------------------ #
     pygame.quit()
 
+def restart (player, enemies, level, game_state, highscore, old_highscore):
+    ### RESTART Funktion
+    print ("RESTART")
+    ## Player RESET
+    player.setup(
+    x=SCREEN_WIDTH // 2,           # Center of screen
+    y=SCREEN_HEIGHT - 50,           # Near bottom of screen
+    dx=0,
+    dy=0,
+    image_prefix="player_stage",
+    anim_speed=1,
+    hp=100,
+    )
+    # Stats RESET
+    player.set_might(rng= 500, dmg=1, cad=20, shotspd= 10)
+    #Enemy RESET
+    enemies.setup(
+    x=SCREEN_WIDTH // 2,
+    y=SCREEN_HEIGHT,
+    dx=0,
+    dy=0,
+    image_prefix="enemy",
+    anim_speed=1,
+    hp=10,
+    damage=1
+    )
+    #level RESET
+    level = Level()
+    level.load("lvl001.rfg")
+    #point RESET
+    global points
+    points = 0
+    if highscore > old_highscore: ##Saving Highscore
+        old_highscore = highscore  
+    game_state.change_state("playing")
 
 if __name__ == "__main__":
     main()

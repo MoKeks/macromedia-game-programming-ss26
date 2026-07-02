@@ -76,7 +76,7 @@ class Level(Entity):
 
         still_waiting_obstacles = []                                     # Warteschlange (vor dem Club der coolen Kids)
         for obstacle in self.waiting_obstacles:
-            if self.frame_count >= obstacle.duration_start:                 # soll es gespawnt werden (Ausweißkontrolle) 
+            if self.frame_count >= obstacle.duration_start:                 # soll es gespawnt werden? (Ausweißkontrolle) 
                 self.obstacles.append(obstacle)                          
             else:
                 still_waiting_obstacles.append(obstacle)                 # Warteschlange wenn noch nicht ready (nur für volljährige))
@@ -89,7 +89,7 @@ class Level(Entity):
 
         still_waiting_enemies = []                                     # Warteschlange (vor dem Club der coolen Kids)
         for enemies in self.waiting_enemies:
-            if self.frame_count >= enemies.spawn_frame:                  # soll es gespawnt werden (Ausweißkontrolle) 
+            if self.frame_count >= enemies.spawn_frame:                  # soll es gespawnt werden? (Ausweißkontrolle) 
                 self.enemies.append(enemies)                          
             else:
                 still_waiting_enemies.append(enemies)                 # Warteschlange wenn noch nicht ready (nur für volljährige))
