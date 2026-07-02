@@ -93,7 +93,9 @@ def main():
                      running = False
                     if event.key == pygame.K_SPACE:
                         if game_state.state == "gameover":
-                            restart (player, enemies, level, game_state, highscore, old_highscore)
+                            level, points, highscore, old_highscore = restart(player, enemies, level, game_state, points, highscore, old_highscore)
+                    
+                           
                 
                 
                      
@@ -295,6 +297,7 @@ def restart (player, enemies, level, game_state, highscore, old_highscore):
     if highscore > old_highscore: ##Saving Highscore
         old_highscore = highscore  
     game_state.change_state("playing")
+    return level, 0 , highscore, old_highscore
 
 if __name__ == "__main__":
     main()
