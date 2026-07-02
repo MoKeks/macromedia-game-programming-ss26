@@ -18,6 +18,7 @@ from gamestate import Game
 from enemy import Enemy
 from obstacle import Obstacle
 from shot import Shot
+from boss import Boss
 
 from time import sleep
 
@@ -187,13 +188,15 @@ def main():
             if level.duration <= duration:
                 current_level, level = next_level(current_level, level)
                 duration = 0
-            if current_level > 3:
-                game_state.change_state("gameover")
+                
+            # if current_level > 3:
+            #     if points > highscore : #highscore checken
+            #         old_highscore = highscore
+            #         highscore = points
+            #     game_state.change_state("gameover")
 
-
-       
-                # Check player.hp <= 0 for death / game_state transition
-            if player.hp <= 0:#
+                # game_state transition to game over
+            if player.hp <= 0 or current_level > 3 :
                
                 if points > highscore : #highscore checken
                     old_highscore = highscore
@@ -214,8 +217,6 @@ def main():
                 font = pygame.font.SysFont(None, 60)
                 text = font.render("Press SPACE to Restart", True, (255, 255, 255))
                 screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
-            
-            
             else:
                 #Game Over Text
                 font = pygame.font.SysFont(None, 72)
@@ -225,9 +226,7 @@ def main():
                 font = pygame.font.SysFont(None, 60)
                 text = font.render("Press SPACE to Restart", True, (255, 255, 255))
                 screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
-                
             
-
             #Score und Highscore
             # Highscore abgleichen
             if points <= old_highscore:
@@ -246,8 +245,6 @@ def main():
                 text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
                 screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
                 
-            
-
             # print ("space") #DEBUG
            
 
@@ -338,7 +335,18 @@ def restart (player, enemies, level, game_state, highscore, old_highscore, curre
     return level, 0 , highscore, old_highscore, current_level
 
 def spawn_Boss ():
-    next_level()
+   boss = Boss ()#
+   boss.setup ( 
+        x=SCREEN_WIDTH // 2,
+        y=SCREEN_HEIGHT,
+        dx=0,
+        dy=0,
+        image_prefix="enemy",
+        anim_speed=1,
+        hp=10,
+        damage=1
+        )
+
 
 def next_level(current_level, level, ):
     current_level += 1
