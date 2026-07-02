@@ -18,3 +18,4 @@ class Game:
         assert new in self.STATES, f"unknown state: {new}"   # Unit 8
         print(f"[state] {self.state} -> {new}")              # free log
         self.state = new
+

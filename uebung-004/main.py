@@ -69,6 +69,7 @@ def main():
     highscore = 0
     old_highscore = highscore
 
+    buff_duration = 0
     
     obstacle = Obstacle ()
 
@@ -122,10 +123,12 @@ def main():
          # NOTE: Der typo ist wichtig (apparently)
             for obstacle in level.obstacles:
                  if obstacle.collsion(player.get_rect()):
-                    player.cad -= 5
-                    obstacle.hp = 0 
+                    obstacle.hp = 0  # kill the object
                     obstacle.is_alive ()
                     points += 200
+                    buff_duration = 50
+                    buff (True, player)
+                    print ("buff start")
 
                  
           
@@ -162,7 +165,13 @@ def main():
                        
              # Shot Collision
 
-
+            # Buff Check
+            if buff_duration > 0 :
+                buff_duration -= 1
+                if buff_duration == 0:
+                    buff (False, player)
+                    print ("buff end")
+                
             
         
 
@@ -299,5 +308,14 @@ def restart (player, enemies, level, game_state, highscore, old_highscore):
     game_state.change_state("playing")
     return level, 0 , highscore, old_highscore
 
+def buff (Buffed, player):
+    if Buffed:
+        player.cad = 25
+        print (player.cad)
+    else: 
+        player.cad = 50
+        print (player.cad)
+
+   
 if __name__ == "__main__":
     main()
