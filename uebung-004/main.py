@@ -64,6 +64,7 @@ def main():
     game_state.change_state("playing")
 
     points = 0
+    highscore = 0
     
     obstacle = Obstacle ()
 
@@ -160,10 +161,19 @@ def main():
         elif game_state.state == "gameover":
            # wäre funny: pygame.quit # einfach spiel schließen wenn man stirbt
             screen.fill(BLACK)
+            
+            #Game Over Text
             font = pygame.font.SysFont(None, 72)
             text = font.render("Game Over!", True, (255, 255, 255))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
             pygame.display.flip()
+
+            #Score und Highscore
+            font = pygame.font.SysFont(None, 50)
+            text = font.render(f"Score: {points}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+
+
             continue   # Spiellogik überspringen
 
         # -------------------------------------------------------------- #
@@ -194,11 +204,27 @@ def main():
         screen.blit(text, (SCREEN_WIDTH - 230 , SCREEN_HEIGHT - 70))
 
         # Score system
-        font = pygame.font.SysFont(None, 50)
-        text = font.render(f"Score: {points}", True, (150, 50, 200))
-        screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
-    
+        
 
+        #Mit Highscore abgleichen
+        if points > highscore :
+            #Neuer Highscore
+            highscore = points
+            font = pygame.font.SysFont(None, 50)
+            text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+
+        else:
+            #Show current score
+            font = pygame.font.SysFont(None, 50)
+            text = font.render(f"Score: {points}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+            # bisheriger Highscore
+            font = pygame.font.SysFont(None, 50)
+            text = font.render(f"Highscore: {points}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+    
+        
         pygame.display.flip()
         clock.tick(FPS)
 
