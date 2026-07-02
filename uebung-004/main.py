@@ -93,7 +93,7 @@ def main():
                      running = False
                     if event.key == pygame.K_SPACE:
                         if game_state.state == "gameover":
-                            level, points, highscore, old_highscore = restart(player, enemies, level, game_state, points, highscore, old_highscore)
+                            level, points, highscore, old_highscore = restart (player, enemies, level, game_state, highscore, old_highscore)
                     
                            
                 
