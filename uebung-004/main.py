@@ -334,17 +334,17 @@ def restart (player, enemies, level, game_state, highscore, old_highscore, curre
     game_state.change_state("playing")
     return level, 0 , highscore, old_highscore, current_level
 
-def spawn_Boss ():
+def spawn_Boss (current_level):
    boss = Boss ()#
    boss.setup ( 
         x=SCREEN_WIDTH // 2,
         y=SCREEN_HEIGHT,
-        dx=0,
-        dy=0,
+        dx=10,
+        dy=10,
         image_prefix="enemy",
         anim_speed=1,
-        hp=10,
-        damage=1
+        hp= 50 + current_level*50,
+        damage=10
         )
 
 
