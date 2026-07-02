@@ -27,7 +27,8 @@ class Boss(Enemy):
         anim_speed: int,
         hp: int,
         damage: int = 1,
-        speed: int = 5
+        speed: int = 5,
+        scale: float = 2.0
     ):
         """Initialize enemy with position, images, and damage."""
         super().setup(x, y, dx, dy, image_prefix, anim_speed, hp)
@@ -35,6 +36,12 @@ class Boss(Enemy):
         self.ready = False
         self.alive = True
         self.speed = speed
+        self.images = [pygame.transform.scale_by(img, scale) for img in self.images]
+        #hitbox anpassen
+        if self.images:
+          rect = self.images[0].get_rect()
+          self.hitbox_w = rect.width
+          self.hitbox_h = rect.height
 
     # ------------------------------------------------------------------ #
     #  step — STUB: calculates direction toward target but doesn't move  #
@@ -53,7 +60,6 @@ class Boss(Enemy):
     # ------------------------------------------------------------------ #
     #  Alive check -- nur wenn lebt wird er generiert                                                   #
     # ------------------------------------------------------------------ #
-   
     def draw(self, screen):
         if not self.alive:
             return              # Toter Enemy wird nicht gezeichnet

@@ -35,7 +35,8 @@ class Enemy(Entity):
         anim_speed: int,
         hp: int,
         damage: int = 1,
-        speed: int = 5
+        speed: int = 10,
+        scale: float = 1.0
     ):
         """Initialize enemy with position, images, and damage."""
         super().setup(x, y, dx, dy, image_prefix, anim_speed, hp)
@@ -43,6 +44,15 @@ class Enemy(Entity):
         self.ready = False
         self.alive = True
         self.speed = speed
+        #hitbox anpassen
+        self.images = [pygame.transform.scale_by(img, scale) for img in self.images]
+        if self.images:
+          rect = self.images[0].get_rect()
+          self.hitbox_w = rect.width
+          self.hitbox_h = rect.height
+        
+
+
 
     # ------------------------------------------------------------------ #
     #  step — STUB: calculates direction toward target but doesn't move  #
