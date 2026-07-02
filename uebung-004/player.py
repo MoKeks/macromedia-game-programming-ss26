@@ -21,6 +21,8 @@ class Player(Entity):
 
         self._cad_counter = 0   # Countdown to next shot
 
+        ## NOTE: Was macht das eigentlich???
+
     # ------------------------------------------------------------------ #
     #  setup — place player near bottom of screen                        #
     # ------------------------------------------------------------------ #
@@ -48,6 +50,17 @@ class Player(Entity):
         self.cad = cad
         self.shotspd = shotspd
         self._cad_counter = cad
+
+    #####################################################
+    # BUFF                                              #
+    #####################################################
+    def buff (self, Buffed):
+        if Buffed:
+            self.cad = self.cad / 2
+            print (self.cad)
+        else: 
+            self.cad = self.cad * 2
+            print (self.cad)
 
     # ------------------------------------------------------------------ #
     #  step — move, track mouse X, fire shots, update shots              #

@@ -21,6 +21,9 @@ from shot import Shot
 
 from time import sleep
 
+LEVEL_FILES = ["lvl001.rfg", "lvl002.rfg", "lvl003.rfg"]
+#                  Index 0        1             2         
+
 
 def main():
     # ------------------------------------------------------------------ #
@@ -59,8 +62,13 @@ def main():
         damage=1
     )
 
+    
+    current_level = 0
     level = Level()
-    level.load("lvl001.rfg")
+    level.load(LEVEL_FILES[current_level])
+    
+
+    duration = 0
 
     game_state = Game()
     game_state.change_state("playing")
@@ -94,7 +102,7 @@ def main():
                      running = False
                     if event.key == pygame.K_SPACE:
                         if game_state.state == "gameover":
-                            level, points, highscore, old_highscore = restart (player, enemies, level, game_state, highscore, old_highscore)
+                            level, points, highscore, old_highscore, current_level = restart (player, enemies, level, game_state, highscore, old_highscore, current_level)
                     
                            
                 
@@ -109,6 +117,7 @@ def main():
         if game_state.state == "playing":
             player.step()
             level.step()
+            duration += 1
             for enemies in level.enemies:
                 enemies.step(target_pos= player.pos, speed = 3)
 
@@ -126,8 +135,8 @@ def main():
                     obstacle.hp = 0  # kill the object
                     obstacle.is_alive ()
                     points += 200
-                    buff_duration = 50
-                    buff (True, player)
+                    buff_duration = 100
+                    player.buff (True)
                     print ("buff start")
 
                  
@@ -169,11 +178,18 @@ def main():
             if buff_duration > 0 :
                 buff_duration -= 1
                 if buff_duration == 0:
-                    buff (False, player)
+                    player.buff (False)
                     print ("buff end")
                 
-            
-        
+            # Level Duration Check
+            print (duration)
+            print (level.duration)
+            if level.duration <= duration:
+                current_level, level = next_level(current_level, level)
+                duration = 0
+            if current_level > 3:
+                game_state.change_state("gameover")
+
 
        
                 # Check player.hp <= 0 for death / game_state transition
@@ -189,15 +205,27 @@ def main():
            # wäre funny: pygame.quit # einfach spiel schließen wenn man stirbt
             screen.fill(BLACK)
             
-            #Game Over Text
-            font = pygame.font.SysFont(None, 72)
-            text = font.render("Game Over!", True, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
+            #Victory Check
+            if current_level > 3:
+                font = pygame.font.SysFont(None, 72)
+                text = font.render("Victory!", True, (100, 255, 100))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
 
-            font = pygame.font.SysFont(None, 60)
-            text = font.render("Press SPACE to Restart", True, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
+                font = pygame.font.SysFont(None, 60)
+                text = font.render("Press SPACE to Restart", True, (255, 255, 255))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
             
+            
+            else:
+                #Game Over Text
+                font = pygame.font.SysFont(None, 72)
+                text = font.render("Game Over!", True, (255, 255, 255))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
+
+                font = pygame.font.SysFont(None, 60)
+                text = font.render("Press SPACE to Restart", True, (255, 255, 255))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
+                
             
 
             #Score und Highscore
@@ -218,7 +246,7 @@ def main():
                 text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
                 screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
                 
-
+            
 
             # print ("space") #DEBUG
            
@@ -271,7 +299,7 @@ def main():
     # ------------------------------------------------------------------ #
     pygame.quit()
 
-def restart (player, enemies, level, game_state, highscore, old_highscore):
+def restart (player, enemies, level, game_state, highscore, old_highscore, current_level):
     ### RESTART Funktion
     print ("RESTART")
     ## Player RESET
@@ -298,24 +326,44 @@ def restart (player, enemies, level, game_state, highscore, old_highscore):
     damage=1
     )
     #level RESET
+    current_level = 0
     level = Level()
-    level.load("lvl001.rfg")
+    level.load(LEVEL_FILES[current_level])
     #point RESET
     global points
     points = 0
     if highscore > old_highscore: ##Saving Highscore
         old_highscore = highscore  
     game_state.change_state("playing")
-    return level, 0 , highscore, old_highscore
+    return level, 0 , highscore, old_highscore, current_level
 
-def buff (Buffed, player):
-    if Buffed:
-        player.cad = 25
-        print (player.cad)
-    else: 
-        player.cad = 50
-        print (player.cad)
+def spawn_Boss ():
+    next_level()
 
-   
+def next_level(current_level, level, ):
+    current_level += 1
+
+    if current_level >= len(LEVEL_FILES):
+      print("Kein weiteres Level mehr")
+      return current_level, level   # unverändert zurückgeben
+
+    level = Level()
+    level.load(LEVEL_FILES[current_level])
+    return current_level, level
+
+# def  next_level (current_level) :
+#     current_level =+ 1
+#     if current_level == 1:
+#         level = Level ()
+#         level.load("lvl002.rfg")
+#     if current_level == 2:
+#         level = Level ()
+#         level.load("lvl003.rfg")      
+#     if current_level >= 3 :
+#         return 
+
+
 if __name__ == "__main__":
     main()
+
+  
