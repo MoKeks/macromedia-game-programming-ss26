@@ -63,7 +63,7 @@ def main():
     game_state = Game()
     game_state.change_state("playing")
 
-
+    points = 0
     
     obstacle = Obstacle ()
 
@@ -110,6 +110,7 @@ def main():
                     player.cad -= 5
                     obstacle.hp = 0 
                     obstacle.is_alive ()
+                    points += 200
 
                  
           
@@ -120,8 +121,9 @@ def main():
 
                 if enemies.collision(player.get_rect()):
                     player.hp -= 10
-                    enemies.hp -= 5
+                    enemies.hp -= 10
                     enemies.is_alive()
+                    points +=  50
 
                 for shot in player.shots :
                     if enemies.collision(shot.get_rect()):
@@ -129,6 +131,7 @@ def main():
                         enemies.is_alive()
                         shot.life = 0
                         #shot.is_alive ()
+                        points += 100
                         break
 
                 for obstacle in level.obstacles:
@@ -189,6 +192,11 @@ def main():
         font = pygame.font.SysFont(None, 50)
         text = font.render(f"HP: {player.hp}/100", True, (255, 80, 80))
         screen.blit(text, (SCREEN_WIDTH - 230 , SCREEN_HEIGHT - 70))
+
+        # Score system
+        font = pygame.font.SysFont(None, 50)
+        text = font.render(f"Score: {points}", True, (150, 50, 200))
+        screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
     
 
         pygame.display.flip()
