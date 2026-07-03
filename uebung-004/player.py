@@ -61,6 +61,8 @@ class Player(Entity):
         else: 
             self.cad = self.cad * 2
             print (self.cad)
+    # NOTE: Buffs können sich nicht überlappen, da der player sonst zwei mal den Buff erhäkt aber nur 1 reseted wird
+    # wurde so gemacht damit cadence nicht hardcoded sein muss sondern durch lvl up verbessert werden kann
 
     # ------------------------------------------------------------------ #
     #  step — move, track mouse X, fire shots, update shots              #

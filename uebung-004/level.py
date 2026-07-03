@@ -74,12 +74,12 @@ class Level(Entity):
         enemy spawning. Students implement this in Uebung 003."""
         self.frame_count += 1   # zählt frames
 
-        still_waiting_obstacles = []                                     # Warteschlange (vor dem Club der coolen Kids)
+        still_waiting_obstacles = []                                     # Warteschlange 
         for obstacle in self.waiting_obstacles:
-            if self.frame_count >= obstacle.duration_start:                 # soll es gespawnt werden? (Ausweißkontrolle) 
+            if self.frame_count >= obstacle.duration_start:                 # soll es gespawnt werden? 
                 self.obstacles.append(obstacle)                          
             else:
-                still_waiting_obstacles.append(obstacle)                 # Warteschlange wenn noch nicht ready (nur für volljährige))
+                still_waiting_obstacles.append(obstacle)                 # Warteschlange wenn noch nicht ready 
         self.waiting_obstacles = still_waiting_obstacles
     
         for obstacle in self.obstacles :
@@ -87,12 +87,12 @@ class Level(Entity):
                 speed = 3
             )
 
-        still_waiting_enemies = []                                     # Warteschlange (vor dem Club der coolen Kids)
+        still_waiting_enemies = []                                     # Warteschlange 
         for enemies in self.waiting_enemies:
-            if self.frame_count >= enemies.spawn_frame:                  # soll es gespawnt werden? (Ausweißkontrolle) 
+            if self.frame_count >= enemies.spawn_frame:                  # soll es gespawnt werden? 
                 self.enemies.append(enemies)                          
             else:
-                still_waiting_enemies.append(enemies)                 # Warteschlange wenn noch nicht ready (nur für volljährige))
+                still_waiting_enemies.append(enemies)                 # Warteschlange wenn noch nicht ready 
         self.waiting_enemies = still_waiting_enemies
 
     # ------------------------------------------------------------------ #

@@ -35,7 +35,7 @@ class Enemy(Entity):
         anim_speed: int,
         hp: int,
         damage: int = 1,
-        speed: int = 10,
+        speed: int= 1,
         scale: float = 1.0
     ):
         """Initialize enemy with position, images, and damage."""

@@ -4,6 +4,7 @@
 # Controls:
 #   Mouse X  — move player left/right
 #   ESC      — quit
+#   SPACE    — continue/restart (only in Shop/GameOver)
 #
 # This skeleton provides:
 #   - Player that follows mouse and auto-fires shots
@@ -23,8 +24,8 @@ from boss import Boss
 from time import sleep
 
 LEVEL_FILES = ["lvl001.rfg", "lvl002.rfg", "lvl003.rfg"]
-#                  Index 0        1             2         
-
+#        Index       0           1              2         
+# Macht es scaleable
 
 def main():
     # ------------------------------------------------------------------ #
@@ -46,10 +47,11 @@ def main():
         dy=0,
         image_prefix="player_stage",
         anim_speed=1,
-        hp=100,
+        hp=1000,
     )
-    player.set_might(rng= 500, dmg=1, cad=20, shotspd= 10)
+    player.set_might(rng= 500, dmg=5, cad=20, shotspd= 10)
     
+    current_level = 0
 
     enemies = Enemy ()
     enemies.setup(
@@ -59,13 +61,10 @@ def main():
         dy=0,
         image_prefix="enemy",
         anim_speed=1,
-        hp=10,
-        damage=1
+        hp=5 + 5 *current_level , #hp scalen mit lvl
     )
 
-    boss = Boss ()
-
-    current_level = 0
+    
     level = Level()
     level.load(LEVEL_FILES[current_level])
     
@@ -105,8 +104,9 @@ def main():
                     if event.key == pygame.K_SPACE:
                         if game_state.state == "gameover":
                             level, points, highscore, old_highscore, current_level = restart (player, enemies, level, game_state, highscore, old_highscore, current_level)
-                        elif game_state.state == "Shop":
-                            current_level, level = next_level(current_level, level)
+                            duration = 0
+                        if game_state.state == "shop":
+                            current_level, level = next_level(current_level, level, game_state)
                             duration = 0                 
                            
                 
@@ -133,7 +133,7 @@ def main():
             #----------------------------------------------------------------#
 
          # Obstacle collsion
-         # NOTE: Der typo ist wichtig (apparently)
+         # NOTE: Der typo ist wichtig 
             for obstacle in level.obstacles:
                  if obstacle.collsion(player.get_rect()):
                     obstacle.hp = 0  # kill the object
@@ -151,14 +151,15 @@ def main():
                     continue
 
                 if enemies.collision(player.get_rect()):
-                    player.hp -= 5
+                    player.hp -= enemies.damage     #nicht hard coden sonst sind die Werte aus der level.rfg irrelevant
+                    print ("Damage Taken:", enemies.damage)
                     enemies.hp -= 10
                     enemies.is_alive()
                     points +=  50
 
                 for shot in player.shots :
                     if enemies.collision(shot.get_rect()):
-                        enemies.hp -= 10
+                        enemies.hp -= shot.dmg
                         enemies.is_alive()
                         shot.life = 0
                         #shot.is_alive ()
@@ -179,36 +180,35 @@ def main():
              # Shot Collision
 
             # Buff Check
+            # NOTE: Buffs können sich nicht überlappen
             if buff_duration > 0 :
                 buff_duration -= 1
                 if buff_duration == 0:
                     player.buff (False)
                     print ("buff end")
-                
-            # Level Duration Check
-            print (duration)
-            print (level.duration)
-            if level.duration == duration:
-                spawn_Boss (current_level, level)
-            if level.duration + 10 < duration:
-                if boss.hp == 0:
-                    game_state.change_state("shop")
-                    
-                
-            # if current_level > 3:
-            #     if points > highscore : #highscore checken
-            #         old_highscore = highscore
-            #         highscore = points
-            #     game_state.change_state("gameover")
 
-                # game_state transition to game over
-            if player.hp <= 0 or current_level >= 3 :
-               
+             # Level Duration
+            print ("Level Frame:", duration)            #DEBUG
+            print ("Max Frames:", level.duration)       #DEBUG
+            if level.duration == duration:            
+                boss = spawn_Boss (current_level, level)
+
+
+            # Game State Check (to shop und gameover)
+            if player.hp <= 0 or current_level >= len(LEVEL_FILES):
+        
                 if points > highscore : #highscore checken
                     old_highscore = highscore
                     highscore = points
                 game_state.change_state("gameover")
-
+             #NOTE: es darf nur ein neuer State zugewiesen werden
+            elif level.duration + 1 < duration:     #elif da sonst die game states sich gegenseitig aufheben#
+                print ("Current HP:", boss.hp)          #DEBUG
+                if boss.hp <= 0:            # der boss kann unter 0 hp fallen
+                   game_state.change_state("shop")
+                    
+            
+           
         ##########################################################
         ## game over mechanic
         ###########################################################
@@ -218,7 +218,7 @@ def main():
             screen.fill(BLACK)
             
             #Victory Check
-            if current_level >= 3:
+            if current_level >= len(LEVEL_FILES):
                 font = pygame.font.SysFont(None, 72)
                 text = font.render("Victory!", True, (100, 255, 100))
                 screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
@@ -268,23 +268,26 @@ def main():
         # #Shop zwischen leveln
         ##########################################################
         elif game_state.state == "shop":
-            screen.fill(BLACK)
+            if current_level >= len(LEVEL_FILES)-1:
+                current_level, level = next_level(current_level, level, game_state)
+            else:
+                screen.fill(BLACK)
 
 
-            font = pygame.font.SysFont(None, 72)
-            text = font.render("Level Completed!", True, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 350))
+                font = pygame.font.SysFont(None, 72)
+                text = font.render("Level Completed!", True, (255, 255, 255))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 350))
 
-            font = pygame.font.SysFont(None, 50)
-            text = font.render("Press SPACE to continue", True, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
+                font = pygame.font.SysFont(None, 50)
+                text = font.render("Press SPACE to continue", True, (255, 255, 255))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
 
-            #Score zeigem
-            font = pygame.font.SysFont(None, 40)
-            text = font.render(f"Current Score: {points}", True, (150, 50, 200))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
+                #Score zeigem
+                font = pygame.font.SysFont(None, 40)
+                text = font.render(f"Current Score: {points}", True, (150, 50, 200))
+                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
 
-            pygame.display.flip()
+                pygame.display.flip()
 
             continue #rest nicht ausführen
             
@@ -347,7 +350,7 @@ def restart (player, enemies, level, game_state, highscore, old_highscore, curre
     anim_speed=1,
     hp=100,
     )
-    # Stats RESET
+    #Stats RESET
     player.set_might(rng= 500, dmg=1, cad=20, shotspd= 10)
     #Enemy RESET
     enemies.setup(
@@ -358,7 +361,6 @@ def restart (player, enemies, level, game_state, highscore, old_highscore, curre
     image_prefix="enemy",
     anim_speed=1,
     hp=10,
-    damage=1
     )
     #level RESET
     current_level = 0
@@ -383,22 +385,25 @@ def spawn_Boss (current_level, level):
         anim_speed=1,
         hp= 50 + current_level*50,
         damage=10+ 10*current_level,
-        speed = 20 + 50 * current_level,
+        speed = 20 + 10 * current_level,
         scale= float(3 + 2*current_level)
     )
    level.enemies.append(boss)
-   return level
+   print ("Boss Spwaned HP:", boss.hp) #DEBUG
+   return boss
 
 
-def next_level(current_level, level, ):
+def next_level(current_level, level, game_state):
     current_level += 1
 
     if current_level >= len(LEVEL_FILES):
       print("Kein weiteres Level mehr")
-      return current_level, level   # unverändert zurückgeben
-
+      game_state.change_state("playing")    
+      #zurück in playing setzen da man aus "Shop kommt" aberdie game over transition in "playing" passiert (Damit der Highscore gesaved wird)
+      return current_level, level   
     level = Level()
     level.load(LEVEL_FILES[current_level])
+    game_state.change_state("playing")
     return current_level, level
 
 # def  next_level (current_level) :
