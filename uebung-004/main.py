@@ -84,6 +84,7 @@ def main():
 
     shot = Shot ()
 
+    frame_stop = 0
 
     # ------------------------------------------------------------------ #
     #  Game loop                                                         #
@@ -109,10 +110,12 @@ def main():
                             current_level, level = next_level(current_level, level, game_state)
                             duration = 0                 
                            
-                
+            
                 
                      
-                    
+        if frame_stop > 0 :
+            frame_stop -= 1
+            continue
 
         # -------------------------------------------------------------- #
         #  Update                                                        #
@@ -196,16 +199,20 @@ def main():
 
             # Game State Check (to shop und gameover)
             if player.hp <= 0 or current_level >= len(LEVEL_FILES):
-        
                 if points > highscore : #highscore checken
                     old_highscore = highscore
                     highscore = points
                 game_state.change_state("gameover")
+                frame_stop += 10
+                continue
              #NOTE: es darf nur ein neuer State zugewiesen werden
             elif level.duration + 1 < duration:     #elif da sonst die game states sich gegenseitig aufheben#
                 print ("Current HP:", boss.hp)          #DEBUG
+        
                 if boss.hp <= 0:            # der boss kann unter 0 hp fallen
-                   game_state.change_state("shop")
+                    game_state.change_state("shop")
+                    frame_stop += 10
+                    continue
                     
             
            
@@ -215,8 +222,68 @@ def main():
 
         elif game_state.state == "gameover":
            # wäre funny: pygame.quit # einfach spiel schließen wenn man stirbt
-            screen.fill(BLACK)
+            #screen.fill(BLACK)
+            print ("game over")
+                
+            # print ("space") #DEBUG
+
+            # continue   # Spiellogik überspringen ## War wichtig bevor draw an die state machine gebunden wurde
+
+        #######################################################
+        # #Shop zwischen leveln
+        ##########################################################
+        elif game_state.state == "shop":
+            if current_level >= len(LEVEL_FILES)-1:
+                current_level, level = next_level(current_level, level, game_state)
+                continue #draw wird übersprungen damit es nahtlos in game_over
             
+                
+
+            #continue #rest nicht ausführen ## War wichtig bevor draw an die state machine gebunden wurde
+            
+
+        # -------------------------------------------------------------- #
+        #  Draw                                                          #
+        # -------------------------------------------------------------- #
+       
+       #### Wird immer gezeichnet
+        screen.fill(BLACK)
+
+        # Draw level background first
+        level.draw(screen)
+        # Draw enemies
+        for enemies in level.enemies:
+                enemies.draw(screen)
+        # Draw obstacles
+        for obstacle in level.obstacles:
+                obstacle.draw(screen)
+        # Draw player (also draws its shots internally)
+        player.draw(screen)
+        
+
+        #state machine bpound drawing
+        #draw playing
+        if game_state.state == "playing":  
+                    
+            # HP Bar
+            # hp = player.hp
+            # print (hp) #DEBUG
+            font = pygame.font.SysFont(None, 50)
+            text = font.render(f"HP: {player.hp}/100", True, (255, 80, 80))
+            screen.blit(text, (SCREEN_WIDTH - 230 , SCREEN_HEIGHT - 70))
+
+            # Score system
+            font = pygame.font.SysFont(None, 50)
+            text = font.render(f"Score: {points}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
+
+            font = pygame.font.SysFont(None, 30)
+            text = font.render(f"Highscore: {old_highscore}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 710))
+       
+       # Draw game over
+        elif game_state.state == "gameover":
+            dim_screen(screen)
             #Victory Check
             if current_level >= len(LEVEL_FILES):
                 font = pygame.font.SysFont(None, 72)
@@ -253,80 +320,22 @@ def main():
                 font = pygame.font.SysFont(None, 50)
                 text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
                 screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
-                
-            # print ("space") #DEBUG
-           
-
-
-            pygame.display.flip()
-            
-            
-
-            continue   # Spiellogik überspringen
-
-        #######################################################
-        # #Shop zwischen leveln
-        ##########################################################
-        elif game_state.state == "shop":
-            if current_level >= len(LEVEL_FILES)-1:
-                current_level, level = next_level(current_level, level, game_state)
-            else:
-                screen.fill(BLACK)
-
-
-                font = pygame.font.SysFont(None, 72)
-                text = font.render("Level Completed!", True, (255, 255, 255))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 350))
-
-                font = pygame.font.SysFont(None, 50)
-                text = font.render("Press SPACE to continue", True, (255, 255, 255))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
-
-                #Score zeigem
-                font = pygame.font.SysFont(None, 40)
-                text = font.render(f"Current Score: {points}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
-
-                pygame.display.flip()
-
-            continue #rest nicht ausführen
-            
-
-        # -------------------------------------------------------------- #
-        #  Draw                                                          #
-        # -------------------------------------------------------------- #
-        screen.fill(BLACK)
-
-        # Draw level background first
-        level.draw(screen)
-
-        # Draw enemies
-        for enemies in level.enemies:
-                enemies.draw(screen)
        
-        # Draw obstacles
-        for obstacle in level.obstacles:
-                obstacle.draw(screen)
+       #Draw Shop
+        elif game_state.state == "shop":
+            dim_screen(screen) # Setz den letzten state des Ganeplay als gedimmten Background
+            font = pygame.font.SysFont(None, 72)
+            text = font.render("Level Completed!", True, (255, 255, 255))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 350))
 
-        # Draw player (also draws its shots internally)
-        player.draw(screen)
+            font = pygame.font.SysFont(None, 50)
+            text = font.render("Press SPACE to continue", True, (255, 255, 255))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
 
-        
-        # HP Bar
-        # hp = player.hp
-        # print (hp) #DEBUG
-        font = pygame.font.SysFont(None, 50)
-        text = font.render(f"HP: {player.hp}/100", True, (255, 80, 80))
-        screen.blit(text, (SCREEN_WIDTH - 230 , SCREEN_HEIGHT - 70))
-
-        # Score system
-        font = pygame.font.SysFont(None, 50)
-        text = font.render(f"Score: {points}", True, (150, 50, 200))
-        screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 750))
-
-        font = pygame.font.SysFont(None, 30)
-        text = font.render(f"Highscore: {old_highscore}", True, (150, 50, 200))
-        screen.blit(text, (SCREEN_WIDTH - 550 , SCREEN_HEIGHT - 710))
+            #Score zeigem
+            font = pygame.font.SysFont(None, 40)
+            text = font.render(f"Current Score: {points}", True, (150, 50, 200))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
 
         
         pygame.display.flip()
@@ -392,6 +401,13 @@ def spawn_Boss (current_level, level):
    print ("Boss Spwaned HP:", boss.hp) #DEBUG
    return boss
 
+def dim_screen (screen):
+    print (SCREEN_WIDTH, SCREEN_HEIGHT)
+    overlay = pygame.Surface(screen.get_size())
+    overlay.fill (BLACK)
+    overlay.set_alpha(180)
+    screen.blit (overlay, (0 , 0))
+
 
 def next_level(current_level, level, game_state):
     current_level += 1
@@ -405,6 +421,7 @@ def next_level(current_level, level, game_state):
     level.load(LEVEL_FILES[current_level])
     game_state.change_state("playing")
     return current_level, level
+
 
 # def  next_level (current_level) :
 #     current_level =+ 1

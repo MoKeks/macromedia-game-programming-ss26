@@ -73,6 +73,9 @@ class Level(Entity):
         """Per-frame update. Empty in the skeleton — no scrolling or
         enemy spawning. Students implement this in Uebung 003."""
         self.frame_count += 1   # zählt frames
+        
+         # Hintergrund scrollen
+        
 
         still_waiting_obstacles = []                                     # Warteschlange 
         for obstacle in self.waiting_obstacles:
