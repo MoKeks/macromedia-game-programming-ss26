@@ -27,6 +27,7 @@ class Level(Entity):
         self.background_image: pygame.Surface | None = None
 
         self.frame_count = 0        # zählt die frames
+        self.scroll_speed = 1.5     # wie schnell ist der Scroll Effekt
 
         self.num_tracks = 0          # Number of tracks (columns)
         self.duration = 0            # Level duration in frames
@@ -75,7 +76,7 @@ class Level(Entity):
         self.frame_count += 1   # zählt frames
         
          # Hintergrund scrollen
-        
+        self.pos += self.dir * self.scroll_speed
 
         still_waiting_obstacles = []                                     # Warteschlange 
         for obstacle in self.waiting_obstacles:
@@ -102,10 +103,14 @@ class Level(Entity):
     #  draw — render background image                                    #
     # ------------------------------------------------------------------ #
     def draw(self, screen: pygame.Surface):
-        """Draw the background image at the level's position."""
-        if self.background_image:
-            screen.blit(self.background_image, (int(self.pos.x), int(self.pos.y)))
+        if not self.background_image:
+            return
+        img_h = self.background_image.get_height() # jolt image daten
+        y = (self.pos.y % img_h) - img_h
 
+        while y < SCREEN_HEIGHT: # prüft ob image kleiner als der screen ist und scrollen notwendig ist
+            screen.blit(self.background_image, (int(self.pos.x), int(y)))
+            y += img_h
     # ================================================================== #
     #  Private parsing helpers                                           #
     # ================================================================== #
