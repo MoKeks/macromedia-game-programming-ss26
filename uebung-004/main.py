@@ -183,7 +183,7 @@ def main():
              # Shot Collision
 
             # Buff Check
-            # NOTE: Buffs können sich nicht überlappen
+            # NOTE: Buffs dürfen sich nicht überlappen
             if buff_duration > 0 :
                 buff_duration -= 1
                 if buff_duration == 0:
@@ -224,6 +224,8 @@ def main():
            # wäre funny: pygame.quit # einfach spiel schließen wenn man stirbt
             #screen.fill(BLACK)
             print ("game over")
+
+            
                 
             # print ("space") #DEBUG
 
@@ -402,10 +404,11 @@ def spawn_Boss (current_level, level):
    return boss
 
 def dim_screen (screen):
-    print (SCREEN_WIDTH, SCREEN_HEIGHT)
+    # Funktion um den den Bildschrim zu verdunkeln
     overlay = pygame.Surface(screen.get_size())
     overlay.fill (BLACK)
     overlay.set_alpha(180)
+
     screen.blit (overlay, (0 , 0))
 
 
