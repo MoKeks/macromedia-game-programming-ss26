@@ -20,6 +20,8 @@ from enemy import Enemy
 from obstacle import Obstacle
 from shot import Shot
 from boss import Boss
+from shop import Shop
+from gameover import Gameover
 
 from time import sleep
 
@@ -64,7 +66,10 @@ def main():
         hp=5 + 5 *current_level , #hp scalen mit lvl
     )
 
-    
+    shop = Shop()
+
+    gameover = Gameover ()
+
     level = Level()
     level.load(LEVEL_FILES[current_level])
     
@@ -108,8 +113,12 @@ def main():
                             duration = 0
                         if game_state.state == "shop":
                             current_level, level = next_level(current_level, level, game_state)
-                            duration = 0                 
-                           
+                            duration = 0   
+                 elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if game_state.state == "shop":
+                        points = shop.handle_click(event.pos, player, points) 
+                        print ("Points:",points) #DEBUG       
+                                    
             
                 
                      
@@ -210,13 +219,19 @@ def main():
                 print ("Current HP:", boss.hp)          #DEBUG
         
                 if boss.hp <= 0:            # der boss kann unter 0 hp fallen
+                    # Beenden von Buff, falls noch aktiv
+                    if buff_duration > 0:
+                        buff_duration = 0
+                        player.buff (False)
+                        print ("buff end")
+                    # Ins den shop gehen
                     game_state.change_state("shop")
                     frame_stop += 10
                     continue
                     
             
            
-        ##########################################################
+        ###########################################################
         ## game over mechanic
         ###########################################################
 
@@ -239,7 +254,8 @@ def main():
                 current_level, level = next_level(current_level, level, game_state)
                 continue #draw wird übersprungen damit es nahtlos in game_over
             
-                
+            # Shop öffnen
+            shop.shop_start ()
 
             #continue #rest nicht ausführen ## War wichtig bevor draw an die state machine gebunden wurde
             
@@ -286,58 +302,13 @@ def main():
        # Draw game over
         elif game_state.state == "gameover":
             dim_screen(screen)
-            #Victory Check
-            if current_level >= len(LEVEL_FILES):
-                font = pygame.font.SysFont(None, 72)
-                text = font.render("Victory!", True, (100, 255, 100))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
-
-                font = pygame.font.SysFont(None, 50)
-                text = font.render("Press SPACE to Restart", True, (255, 255, 255))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
-            else:
-                #Game Over Text
-                font = pygame.font.SysFont(None, 72)
-                text = font.render("Game Over!", True, (255, 255, 255))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
-
-                font = pygame.font.SysFont(None, 60)
-                text = font.render("Press SPACE to Restart", True, (255, 255, 255))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
-            
-            #Score und Highscore
-            # Highscore abgleichen
-            if points <= old_highscore:
-                #Show current score
-                font = pygame.font.SysFont(None, 40)
-                text = font.render(f"Score: {points}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
-                # bisheriger Highscore
-                font = pygame.font.SysFont(None, 30)
-                text = font.render(f"Highscore: {highscore}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 150))
-
-            else:
-                #Neuer Highscore
-                font = pygame.font.SysFont(None, 50)
-                text = font.render(f"NEW HIGHSCORE: {points}", True, (150, 50, 200))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
+            gameover.draw_gameover (screen, SCREEN_WIDTH, SCREEN_HEIGHT, points, highscore, old_highscore, current_level, LEVEL_FILES)
        
        #Draw Shop
         elif game_state.state == "shop":
             dim_screen(screen) # Setz den letzten state des Ganeplay als gedimmten Background
-            font = pygame.font.SysFont(None, 72)
-            text = font.render("Level Completed!", True, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 350))
+            shop.draw_shop (screen, SCREEN_WIDTH, SCREEN_HEIGHT, player, points)
 
-            font = pygame.font.SysFont(None, 50)
-            text = font.render("Press SPACE to continue", True, (255, 255, 255))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + 250))
-
-            #Score zeigem
-            font = pygame.font.SysFont(None, 40)
-            text = font.render(f"Current Score: {points}", True, (150, 50, 200))
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
 
         
         pygame.display.flip()
@@ -404,7 +375,7 @@ def spawn_Boss (current_level, level):
    return boss
 
 def dim_screen (screen):
-    # Funktion um den den Bildschrim zu verdunkeln
+    # Funktion um den den Bildschirm zu verdunkeln
     overlay = pygame.Surface(screen.get_size())
     overlay.fill (BLACK)
     overlay.set_alpha(180)
@@ -440,5 +411,3 @@ def next_level(current_level, level, game_state):
 
 if __name__ == "__main__":
     main()
-
-  
