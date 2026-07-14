@@ -22,6 +22,7 @@ from shot import Shot
 from boss import Boss
 from shop import Shop
 from gameover import Gameover
+from title import Title
 
 from time import sleep
 
@@ -70,6 +71,8 @@ def main():
 
     gameover = Gameover ()
 
+    title = Title ()
+
     level = Level()
     level.load(LEVEL_FILES[current_level])
     
@@ -77,7 +80,7 @@ def main():
     duration = 0
 
     game_state = Game()
-    game_state.change_state("playing")
+    game_state.change_state("title")
 
     points = 0
     highscore = 0
@@ -114,6 +117,8 @@ def main():
                         if game_state.state == "shop":
                             current_level, level = next_level(current_level, level, game_state)
                             duration = 0   
+                        if game_state.state == "title":
+                            game_state.change_state("playing")
                  elif event.type == pygame.MOUSEBUTTONDOWN:
                     if game_state.state == "shop":
                         points = shop.handle_click(event.pos, player, points) 
@@ -280,6 +285,10 @@ def main():
         
 
         #state machine bpound drawing
+        #draw title
+        if game_state.state == "title":
+            dim_screen(screen)
+            title.draw_title (screen, SCREEN_WIDTH, SCREEN_HEIGHT)
         #draw playing
         if game_state.state == "playing":  
                     
@@ -366,7 +375,7 @@ def spawn_Boss (current_level, level):
         image_prefix="enemy",
         anim_speed=1,
         hp= 75 + current_level*50,
-        damage=10+ 5*current_level,
+        damage= 5 + 5*current_level,
         speed = 15 + 3 * current_level,
         scale= float(3 + 2*current_level)
     )

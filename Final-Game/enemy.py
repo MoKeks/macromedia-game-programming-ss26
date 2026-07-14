@@ -1,0 +1,96 @@
+# enemy.py
+# STUBBED enemy class. Students will implement AI, drawing, and collision.
+
+import pygame
+from entity import Entity
+
+
+class Enemy(Entity):
+    """STUB: Enemy entity. Has fields but no real behavior yet.
+
+    Students should implement:
+    - step(target): move toward target
+    - draw(): render the enemy
+    - Collision with player shots
+    - Spawning from level data
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.damage = 0             # Damage dealt to player on contact
+        self.starting_point = 0     # Spawn frame (when in the level duration)
+        self.ready = False          # Whether the enemy has been activated
+        self.alive = True           # Whether the enemy is still alive
+
+    # ------------------------------------------------------------------ #
+    #  setup — initialize enemy (extends Entity.setup)                   #
+    # ------------------------------------------------------------------ #
+    def setup(
+        self,
+        x: float,
+        y: float,
+        dx: float,
+        dy: float,
+        image_prefix: str,
+        anim_speed: int,
+        hp: int,
+        damage: int = 1,
+        speed: int= 1,
+        scale: float = 1.0
+    ):
+        """Initialize enemy with position, images, and damage."""
+        super().setup(x, y, dx, dy, image_prefix, anim_speed, hp)
+        self.damage = damage
+        self.ready = False
+        self.alive = True
+        self.speed = speed
+        #hitbox anpassen
+        self.images = [pygame.transform.scale_by(img, scale) for img in self.images]
+        if self.images:
+          rect = self.images[0].get_rect()
+          self.hitbox_w = rect.width
+          self.hitbox_h = rect.height
+        
+
+
+
+    # ------------------------------------------------------------------ #
+    #  step — STUB: calculates direction toward target but doesn't move  #
+    # ------------------------------------------------------------------ #
+    def step(self, target_pos: pygame.Vector2, speed):
+        """STUB: Calculate direction toward target.
+        The C++ version computes the vector but doesn't apply it.
+        Students should implement actual movement here."""
+        if self.alive:
+            # Calculate direction toward target (not applied — stub)
+            direction = target_pos - self.pos
+            if direction.length () > 0:
+                direction = direction.normalize ()
+            self.pos += direction * speed
+            
+    # ------------------------------------------------------------------ #
+    #  Alive check -- nur wenn lebt wird er generiert                                                   #
+    # ------------------------------------------------------------------ #
+   
+    def draw(self, screen):
+        if not self.alive:
+            return              # Toter Enemy wird nicht gezeichnet
+        super().draw(screen)
+    # ------------------------------------------------------------------ #
+    #  collision check                                                    #
+    # ------------------------------------------------------------------ #
+    def collision(self, rect):
+        if not self.alive:
+            return False
+        return self.get_rect().colliderect(rect)
+        
+
+    # ------------------------------------------------------------------ #
+    #  is_alive — check if enemy HP is above 0 (latches to dead)        #
+    # ------------------------------------------------------------------ #
+    def is_alive(self) -> bool:
+        """Return True if the enemy is alive. Once HP drops to 0,
+        alive is permanently set to False (mirrors C++ behavior)."""
+        if self.hp <= 0:
+            self.alive = False
+        return self.alive
